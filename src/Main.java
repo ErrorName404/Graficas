@@ -13,18 +13,15 @@ public class Main {
                 case 1 ->{
                     files.add();
                 }
-                /*case 2 ->{
+                case 2 ->{
                     files.barChart();
-                }*/
-                /*case 3 ->{
-                    files.pointChart();
-                }*/
+                }
+                case 3 ->{
+                    files.lineChart();
+                }
                 case 4 ->{
                     files.pieChart();
                 }
-                /*case 11 ->{
-                    files.printAllDebug();
-                }*/
                 case 9 ->{}
 
                 default -> error.print("ERROR, NOT AN OPTION!");

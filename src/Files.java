@@ -4,7 +4,16 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.PieSectionLabelGenerator;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.general.SeriesDataset;
+import org.jfree.data.time.Month;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -109,8 +118,126 @@ public class Files {
         employeesList.add(employee);
     }
     public void barChart(){
+        //pie chart
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset ();
 
+        //get totals
+        float totalNorth=getTotalBranch("north");
+        float totalSouth=getTotalBranch("south");
+
+        //add values to data set
+        dataset.setValue(totalNorth,"Sales","North");
+        dataset.setValue(totalSouth,"Sales","South");
+
+
+
+        //construct object chart
+        JFreeChart barchart = ChartFactory.createBarChart(
+                "Total sales by branch",
+                "",
+                "",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false);
+
+
+        ChartPanel chart = new ChartPanel(barchart);
+        chart.setMouseWheelEnabled(true);
+        chart.setPreferredSize(new Dimension(500,500));
+
+
+        frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(500,500);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout());
+        frame.setResizable(false);
+        frame.setAlwaysOnTop( true );
+        frame.setTitle("Chart");
+        frame.add(chart);
+        frame.repaint();
+        frame.setVisible(true);
+        frame.toFront();
+        frame.pack();
+        frame.repaint();
     }
+    public void lineChart(){
+        //pie chart
+        float [] salesNorth=monthtlySales("north");
+        float [] salesSouth=monthtlySales("south");
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+
+        TimeSeries north = new TimeSeries("north");
+        TimeSeries south = new TimeSeries("south");
+        for (int x=0;x<6;x++){
+            north.add(new Month(x+1,2024),salesNorth[x]);
+        }
+        dataset.addSeries(north);
+
+        for (int x=0;x<6;x++){
+            south.add(new Month(x+1,2024),salesSouth[x]);
+        }
+        dataset.addSeries(south);
+
+        JFreeChart LineChart = ChartFactory.createTimeSeriesChart(
+                "Sales by month", // Chart
+                "Date", // X-Axis Label
+                "Total Sales", // Y-Axis Label
+                dataset);
+
+        ChartPanel chart = new ChartPanel(LineChart);
+
+        chart.setMouseWheelEnabled(true);
+        chart.setPreferredSize(new Dimension(500,500));
+
+
+        frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(500,500);
+        frame.setLocationRelativeTo(null);
+        frame.setLayout(new BorderLayout());
+        frame.setResizable(false);
+        frame.setAlwaysOnTop( true );
+        frame.setTitle("Chart");
+        frame.add(chart);
+        frame.repaint();
+        frame.setVisible(true);
+        frame.toFront();
+        frame.pack();
+        frame.repaint();
+    }
+
+    public float[] monthtlySales(String branch){
+        float[] sales=new float[6];
+        Employees employee = new Employees(0,0,0,0,0,0,0,0);
+        //[1-North][2-South]
+        Error error = new Error();
+        for (int x=0;x<employeesList.size();x++) {
+            employee = new Employees(0,0,0,0,0,0,0,0);
+            employee = employeesList.get(x);
+            if (branch=="north"&&employeesList.get(x).getBranch()==1) {
+                sales[0]=sales[0]+employee.getJanuarySales();
+                sales[1]=sales[1]+employee.getFebruarySales();
+                sales[2]=sales[2]+employee.getMarchSales();
+                sales[3]=sales[3]+employee.getAprilSales();
+                sales[4]=sales[4]+employee.getMaySales();
+                sales[5]=sales[5]+employee.getJuneSales();
+            }
+            else if (branch=="south"&&employeesList.get(x).getBranch()==2) {
+                sales[0]=sales[0]+employee.getJanuarySales();
+                sales[1]=sales[1]+employee.getFebruarySales();
+                sales[2]=sales[2]+employee.getMarchSales();
+                sales[3]=sales[3]+employee.getAprilSales();
+                sales[4]=sales[4]+employee.getMaySales();
+                sales[5]=sales[5]+employee.getJuneSales();
+            }
+        }
+        return sales;
+    }
+
+
 
     public void pieChart(){
         //pie chart
