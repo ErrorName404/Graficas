@@ -31,6 +31,8 @@ public class Main {
             }
         } while (mainMenuOption != 9);
         files.saveToDisk();
-        files.frame.dispose();
+        if (files.frame!=null){
+            files.frame.dispose();
+        }
     }
 }

@@ -17,7 +17,7 @@ import javax.swing.JFrame;
 public class Files {
     final private String dataFileName;
     private RandomAccessFile dataStream;
-    ArrayList<Employees> employeesList = null;
+    private ArrayList<Employees> employeesList = null;
     private final int bytesEntry;
     private final int idBytes=4;
     private final int monthlySalesBytes=4;
@@ -27,7 +27,7 @@ public class Files {
 
     public Files(String dataFileName) {
         this.dataFileName = dataFileName;
-        bytesEntry = 32;
+        bytesEntry = idBytes+(6*monthlySalesBytes)+branchBytes;
         employeesList = new ArrayList<Employees>();
     }
     private void open(){
@@ -40,12 +40,15 @@ public class Files {
     private void loadInMemory(){
         Employees employee = new Employees(0,0,0,0,0,0,0,0);
         long fileSize=0;
-        int id, pointer;
         try{
-            dataStream.seek(0);
+
             fileSize = dataStream.length();
             totalEntries = (int)fileSize / bytesEntry;
             for(int x=0; x<totalEntries; x++){
+                employee = new Employees(0,0,0,0,0,0,0,0);
+
+                dataStream.seek(x*bytesEntry);
+
                 employee.setID(dataStream.readInt());
                 employee.setJanuarySales(dataStream.readFloat());
                 employee.setFebruarySales(dataStream.readFloat());
@@ -80,6 +83,7 @@ public class Files {
     public boolean employeeExists(int searchedEmployee){
         Employees employee = new Employees(0,0,0,0,0,0,0,0);
         for (int x=0;x<employeesList.size();x++){
+            employee = new Employees(0,0,0,0,0,0,0,0);
             employee=employeesList.get(x);
             if(employee.getID()==searchedEmployee){
                 return true;
@@ -93,6 +97,7 @@ public class Files {
         Error error = new Error();
         boolean exists=true;
         do{
+            employee = new Employees(0,0,0,0,0,0,0,0);
             employee = employee.requestID(employee);
             exists=employeeExists(employee.getID());
             if(exists){
@@ -148,6 +153,7 @@ public class Files {
         frame.setAlwaysOnTop( true );
         frame.setTitle("Chart");
         frame.add(chart);
+        frame.repaint();
         frame.setVisible(true);
         frame.toFront();
         frame.pack();
@@ -159,24 +165,15 @@ public class Files {
         //[1-North][2-South]
         Error error = new Error();
         float total=0;
-        switch (branch) {
-            case "north" -> {
-                for (int x=0;x<employeesList.size();x++){
-                    employee=employeesList.get(x);
-                    if(employee.getBranch()==1){
-                        total=total+employee.getTotal();
-                    }
-                }
+        for (int x=0;x<employeesList.size();x++) {
+            employee = new Employees(0,0,0,0,0,0,0,0);
+            employee = employeesList.get(x);
+            if (branch=="north"&&employeesList.get(x).getBranch()==1) {
+                total = total + employee.getTotal();
             }
-            case "south" -> {
-                for (int x=0;x<employeesList.size();x++){
-                    employee=employeesList.get(x);
-                    if(employee.getBranch()==2){
-                        total=total+employee.getTotal();
-                    }
-                }
+            else if (branch=="south"&&employeesList.get(x).getBranch()==2) {
+                total = total + employee.getTotal();
             }
-            default -> error.print("Invalid branch");
         }
         return total;
     }
@@ -186,8 +183,10 @@ public class Files {
             File data=new File(dataFileName);
             data.delete();
             open();
-            dataStream.seek(0);
+
             for(int x=0; x<employeesList.size(); x++){
+                employee = new Employees(0,0,0,0,0,0,0,0);
+                dataStream.seek(x*bytesEntry);
                 employee=employeesList.get(x);
                 dataStream.writeInt(employee.getID());
                 dataStream.writeFloat(employee.getJanuarySales());
